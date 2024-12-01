@@ -1,32 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import TabCard from './TabCard';
 
-import Dog1 from '@/public/test-account/dog1.png';
-import Plus from '@/public/test-account/plus.svg';
+import Plus from '@/public/svg/plus.svg';
+import { useSession } from 'next-auth/react';
+import AddDogModal from './AddDogModal';
+import { UserDogProps } from '@/types/types';
+import { getDogsByUserId } from '@/services/SocialService';
+import Link from 'next/link';
 
-const DogsTab = () => {
-  const [dogs, setDogs] = useState([
-    {
-      id: 1,
-      title: 'Nord',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam massa erat, faucibus...',
-      photoUrl: Dog1,
-    },
-  ]);
+const DogsTab = ({ id }: { id: string }) => {
+  const [allDogs, setAllDogs] = useState<UserDogProps[]>([]);
+
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const { data: session } = useSession();
+
+  const onHandleClickOpenModal = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    value: boolean
+  ) => {
+    e.preventDefault();
+    setIsOpenModal(value);
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+      const dgs = await getDogsByUserId(id);
+
+      const newDgs = dgs.map((item: UserDogProps) => item);
+
+      setAllDogs(newDgs);
+    };
+
+    getData();
+  }, [allDogs]);
 
   return (
-    <div className="flex gap-[100px] items-center">
-      {dogs.map((dog) => (
-        <TabCard key={dog.id} {...dog} />
+    <div
+      className={`flex flex-wrap gap-[70px] px-[45px] py-[30px] items-center ${
+        allDogs.length > 0 ? '' : 'justify-center h-full'
+      }`}>
+      {/* {isOpenModal && (
+        <AddDogModal
+          userId={id}
+          setIsOpen={onHandleClickOpenModal}
+          closeModal={() => setIsOpenModal(false)}
+        />
+      )} */}
+      {allDogs.map((dog) => (
+        <TabCard key={dog.id} userId={id} isDog dog={dog} />
       ))}
-      <button className="bg-white w-[85px] h-[85px] rounded-full flex justify-center items-center hover:bg-astronaut">
-        <Image src={Plus} alt="plus btn" width={37} height={37} />
-      </button>
+      {session?.user?.id === id ? (
+        <>
+          {/* <button
+            onClick={(e) => onHandleClickOpenModal(e, true)}
+            className="bg-white w-[52px] h-[52px] rounded-full flex justify-center items-center hover:scale-110 duration-300">
+            <Image src={Plus} alt="plus btn" width={23} height={23} />
+          </button> */}
+          <Link
+            href={`/dog/create`}
+            className="bg-white w-[52px] h-[52px] rounded-full flex justify-center items-center hover:scale-110 duration-300">
+            <Image src={Plus} alt="plus btn" width={23} height={23} />
+          </Link>
+        </>
+      ) : null}
     </div>
   );
 };

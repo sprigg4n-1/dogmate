@@ -1,32 +1,67 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import TabCard from './TabCard';
 import Image from 'next/image';
 
-import Dog1 from '@/public/test-account/dog2.png';
-import Plus from '@/public/test-account/plus.svg';
+import Plus from '@/public/svg/plus.svg';
+import { useSession } from 'next-auth/react';
+import AddPostModal from './AddPostModal';
+import { getPostsByUserId } from '@/services/SocialService';
+import { UserPostProps } from '@/types/types';
 
-const PostsTab = () => {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: 'Nord',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam massa erat, faucibus...',
-      photoUrl: Dog1,
-    },
-  ]);
+const PostsTab = ({ id }: { id: string }) => {
+  const [allPosts, setAllPosts] = useState<UserPostProps[]>([]);
+
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const { data: session } = useSession();
+
+  const onHandleClickOpenModal = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    value: boolean
+  ) => {
+    e.preventDefault();
+    setIsOpenModal(value);
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+      const psts = await getPostsByUserId(id);
+
+      const newPsts = psts.map((item: UserPostProps) => item);
+
+      console.log(JSON.stringify(newPsts));
+
+      setAllPosts(newPsts);
+    };
+
+    getData();
+  }, [allPosts]);
 
   return (
-    <div className="flex gap-[100px] items-center">
-      {posts.map((post) => (
-        <TabCard key={post.id} {...post} />
+    <div
+      className={`flex flex-wrap gap-[70px] px-[45px] py-[30px] items-center ${
+        allPosts.length > 0 ? '' : 'justify-center h-full'
+      }`}>
+      {isOpenModal && (
+        <AddPostModal
+          userId={id}
+          setIsOpen={onHandleClickOpenModal}
+          closeModal={() => setIsOpenModal(false)}
+        />
+      )}
+      {allPosts.map((post) => (
+        <TabCard key={post.id} userId={id} isDog={false} post={post} />
       ))}
-      <button className="bg-white w-[85px] h-[85px] rounded-full flex justify-center items-center hover:bg-astronaut">
-        <Image src={Plus} alt="plus btn" width={37} height={37} />
-      </button>
+      {session?.user?.id === id ? (
+        <button
+          onClick={(e) => onHandleClickOpenModal(e, true)}
+          className="bg-white w-[52px] h-[52px] rounded-full flex justify-center items-center hover:scale-110 duration-300">
+          <Image src={Plus} alt="plus btn" width={23} height={23} />
+        </button>
+      ) : null}
     </div>
   );
 };

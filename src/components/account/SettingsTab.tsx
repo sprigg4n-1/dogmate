@@ -1,141 +1,107 @@
 'use client';
 
+import { signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 const SettingsTab = () => {
-  const [userData, setUserData] = useState({
-    nickname: 'Yukki',
-    name: 'Valeria',
-    surname: 'Markelova',
-    sex: 'female',
-    email: 'markelovav896@gmail.com',
-    phone: '380666148080',
-  });
+  const { data: session } = useSession();
 
-  const [nickname, setNickname] = useState('');
-  const [name, setName] = useState('');
-  const [surname, setSurname] = useState('');
-  const [sex, setSex] = useState(userData.sex);
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const router = useRouter();
 
   const onHandleSubmit = (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(userData);
-
-    const newUserData = {
-      nickname: nickname === '' ? userData.nickname : nickname,
-      name: name === '' ? userData.name : name,
-      surname: surname === '' ? userData.surname : surname,
-      sex: sex !== userData.sex ? sex : userData.sex,
-      email: email === '' ? userData.email : email,
-      phone: phone === '' ? userData.phone : phone,
-    };
-
-    setUserData(newUserData);
-
-    setNickname('');
-    setName('');
-    setSurname('');
-    setSex(newUserData.sex);
-    setEmail('');
-    setPhone('');
+    alert('На жаль, цей функціонла ще не працює');
   };
 
   return (
-    <div className="px-58px bg-[#f1f1f1] rounded-2xl overflow-hidden flex">
+    <div className="flex h-full">
       {/* tabs */}
-      <ul>
+      <ul className="flex flex-col h-full bg-lightGreen bg-opacity-50">
         <li>
-          <button className="px-[58px] py-[23px] text-[24px] text-white bg-kittenEye border-b-2 border-[#3E3E3E]">
-            changing own data
+          <button className="px-[58px] py-[23px] text-[24px] text-white hover:bg-mainDark">
+            Changing own data
+          </button>
+        </li>
+        <li className="mt-auto">
+          <button
+            className="px-[58px] py-[23px] text-[24px] text-white hover:bg-red-500 w-full"
+            onClick={async (e) => {
+              e.preventDefault();
+
+              signOut();
+              router.replace('/auth');
+            }}>
+            log out
           </button>
         </li>
       </ul>
 
       {/* forms of tab */}
-      <div className="border-l-2 border-[#3E3E3E] flex-1">
+      <div className="flex-1 h-full">
         <form
-          className="pb-5 pt-[54px] px-[60px] flex flex-col gap-[25px]"
+          className="py-10 px-[60px] flex flex-col gap-[25px]  h-full"
           onSubmit={onHandleSubmit}>
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              nickname
+          <label>
+            <span className="text-[24px] text-white font-medium">
+              Змінити ім'я і фамілію:
             </span>
-            <input
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80"
-              type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={userData.nickname}
-            />
-          </label>
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              name
-            </span>
-            <input
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={userData.name}
-            />
-          </label>
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              surname
-            </span>
-            <input
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80"
-              type="text"
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-              placeholder={userData.surname}
-            />
-          </label>
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              sex
-            </span>
-            <select
-              value={sex}
-              onChange={(e) => setSex(e.target.value)}
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80">
-              <option value="none">none</option>
-              <option value="female">female</option>
-              <option value="man">man</option>
-            </select>
+            <div className="mt-5 flex justify-between gap-20">
+              <input
+                type="text"
+                placeholder={session?.user.name}
+                className="w-1/2 py-1 px-2 text-[22px] text-mainDark"
+              />
+              <input
+                type="text"
+                placeholder={session?.user.surname}
+                className="w-1/2 py-1 px-2 text-[22px] text-mainDark"
+              />
+            </div>
           </label>
 
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              email
+          <label>
+            <span className="text-[24px] text-white font-medium">
+              Змінити {session?.user.role === 'user' ? 'нікнейм' : 'пошту'}
             </span>
-            <input
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80"
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={userData.email}
-            />
+            <div className="mt-5 flex justify-between gap-20">
+              <input
+                type="text"
+                placeholder={
+                  session?.user.role === 'user'
+                    ? session?.user.nickname
+                    : session?.user.email
+                }
+                className="w-1/2 py-1 px-2 text-[22px] text-mainDark"
+              />
+            </div>
           </label>
-
-          <label className="flex gap-[56px] items-center">
-            <span className="text-[32px] text-black opacity-80 w-[145px]">
-              phone
+          <label>
+            <span className="text-[24px] text-white font-medium">
+              Змінити пароль
             </span>
-            <input
-              className="w-[285px] py-[3px] pl-6 pr-1 text-[20px] text-black border-2 border-black rounded-lg placeholder:text-black placeholder:opacity-80"
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={userData.phone}
-            />
+            <div className="mt-5 flex justify-between gap-20">
+              <input
+                type="text"
+                placeholder="новий пароль"
+                className="w-1/2 py-1 px-2 text-[22px] text-mainDark"
+              />
+            </div>
           </label>
-
+          <label>
+            <span className="text-[24px] text-white font-medium">
+              Змінити вік
+            </span>
+            <div className="mt-5 flex justify-between gap-20">
+              <input
+                type="date"
+                placeholder="новий пароль"
+                className="w-1/2 py-1 px-2 text-[22px] text-mainDark"
+              />
+            </div>
+          </label>
           <button
-            className="block w-[135px] text-center py-[6px] text-white text-[20px] tracking-widest bg-kittenEye ml-auto rounded-md"
+            className="block w-[135px] mt-auto text-center py-[6px] text-white text-[20px] tracking-widest bg-accYellow ml-auto rounded-md hover:bg-yellow-400 duration-300"
             type="submit">
             Save
           </button>
